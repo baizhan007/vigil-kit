@@ -6,7 +6,7 @@
 [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![.NET Framework](https://img.shields.io/badge/.NET%20Framework-4.8-512BD4)](https://dotnet.microsoft.com/download/dotnet-framework)
 
-> 状态：可用。97 项断言全部通过，零编译警告。
+> 状态：可用。96 项断言全部通过，零编译警告。
 
 ---
 
@@ -154,7 +154,7 @@ pwsh -File build.ps1
 [+] VigilKit.Tests.exe 已生成: 23,552 字节
 [*] 运行自测
 ...
-全部通过：97 项
+全部通过：96 项
 [+] 自测通过
 ```
 
@@ -166,7 +166,7 @@ dotnet build src/VigilKit/VigilKit.csproj
 
 ### 测试覆盖
 
-97 项断言，覆盖范围：
+96 项断言，覆盖范围：
 
 | 类别 | 验证内容 |
 |---|---|

@@ -604,11 +604,14 @@ namespace VigilKit.Tests
                         tables.Count, tables.Count > 0 ? string.Join(", ", tables.GetRange(0,
                             Math.Min(5, tables.Count)).ToArray()) : "(无)"));
 
+                    // 这里只输出信息、不作断言。
+                    // 真实库的内容取决于该环境的浏览历史：本地开发机上有两千多条记录，
+                    // 而 CI runner 上刚装好的 Edge 数据库是空的（urls 表 0 行）。
+                    // 拿环境数据断言会让测试结果随环境漂移——测试必须只取决于被测代码。
                     if (tables.Contains("urls"))
                     {
                         List<object[]> rows = reader.ReadTable("urls");
-                        Console.WriteLine(string.Format("  urls 表行数: {0}", rows.Count));
-                        Check("真实库 urls 表可读", rows.Count > 0);
+                        Console.WriteLine(string.Format("  urls 表行数: {0}（仅信息，不作断言）", rows.Count));
                     }
                     else
                     {
