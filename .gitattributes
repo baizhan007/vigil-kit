@@ -1,0 +1,19 @@
+# 统一使用 LF，避免 Windows 检出后产生满屏 CRLF 虚假 diff。
+# 这些文件全部是纯文本，LF 在 Windows / macOS / Linux 上都能正常使用。
+* text=auto eol=lf
+
+# 明确按文本处理（覆盖 Git 的二进制探测，防止非 ASCII 内容被误判）
+*.cs    text eol=lf
+*.md    text eol=lf
+*.ps1   text eol=lf
+*.py    text eol=lf
+*.csproj text eol=lf
+*.gitignore   text eol=lf
+*.gitattributes text eol=lf
+
+# 二进制文件不做行尾转换
+*.dll   binary
+*.exe   binary
+*.pdb   binary
+*.png   binary
+*.jpg   binary

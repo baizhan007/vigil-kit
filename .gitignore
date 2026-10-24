@@ -1,0 +1,24 @@
+# 构建产物
+build/
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+*.xml
+
+# 测试临时文件
+*.log
+*.tmp
+*.db
+*.hex
+
+# IDE
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Python（仅用于夹具交叉验证）
+__pycache__/
+*.pyc

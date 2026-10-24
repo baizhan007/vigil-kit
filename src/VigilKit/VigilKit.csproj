@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>5</LangVersion>
+    <AssemblyName>VigilKit</AssemblyName>
+    <RootNamespace>VigilKit</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Description>零依赖的 .NET Framework 工具集：SQLite 解析、AES-GCM、密封信道、JSON、Zip。</Description>
+    <PackageId>VigilKit</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Vigil contributors</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+</Project>
