@@ -12,32 +12,41 @@ jobs:
     name: 构建并运行自测
     runs-on: windows-latest
 
+    defaults:
+      run:
+        shell: pwsh
+
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
 
-      - name: 确认编译器可用
-        shell: pwsh
+      - name: 环境信息
         run: |
-          $csc = "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
-          if (-not (Test-Path $csc)) {
-            $csc = "$env:WINDIR\Microsoft.NET\Framework\v4.0.30319\csc.exe"
-          }
-          if (-not (Test-Path $csc)) {
-            Write-Error "找不到 .NET Framework 的 csc.exe"
-            exit 1
-          }
-          Write-Host "编译器: $csc"
-          & $csc /? | Select-Object -First 1
+          "pwsh 版本            : $($PSVersionTable.PSVersion)"
+          "输出是否重定向       : $([Console]::IsOutputRedirected)"
+          "ErrorActionPreference: $ErrorActionPreference"
 
       - name: 构建并运行自测
-        shell: pwsh
-        run: ./build.ps1
+        run: |
+          # 刻意不用 Stop 模式：编译器与测试都是原生命令，
+          # 让退出码由我们自己检查，避免环境差异导致误判失败。
+          $ErrorActionPreference = 'Continue'
 
-      - name: 上传失败日志
-        if: failure()
+          ./build.ps1
+          $code = $LASTEXITCODE
+          ""
+          "build.ps1 退出码: $code"
+
+          if ($code -ne 0) { exit $code }
+
+      - name: 上传构建日志
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-logs
-          path: build/
+          name: build-artifacts
+          path: |
+            build/*.log
+            build/*.err
+            build/*.txt
           if-no-files-found: ignore
+          retention-days: 7

@@ -29,7 +29,11 @@ namespace VigilKit.Tests
 
         public static int Main(string[] args)
         {
-            Console.OutputEncoding = Encoding.UTF8;
+            // 控制台编码在 stdout 被重定向时（CI、管道、文件）可能设置失败，
+            // 例如 GitHub Actions 里就没有真实控制台。这不是致命错误，
+            // 输出退化成默认编码即可，不能因此中断测试。
+            try { Console.OutputEncoding = Encoding.UTF8; }
+            catch { }
 
             Console.WriteLine("================ VigilKit 自测 ================");
             Console.WriteLine();
