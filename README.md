@@ -2,7 +2,9 @@
 
 零依赖的 .NET Framework 工具集。C# 5 / net48，不引入任何第三方包。
 
-[![tests](https://img.shields.io/badge/tests-97%20passing-brightgreen)]() [![license](https://img.shields.io/badge/license-MIT-blue)]()
+[![tests](https://github.com/baizhan007/vigil-kit/actions/workflows/tests.yml/badge.svg)](https://github.com/baizhan007/vigil-kit/actions/workflows/tests.yml)
+[![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![.NET Framework](https://img.shields.io/badge/.NET%20Framework-4.8-512BD4)](https://dotnet.microsoft.com/download/dotnet-framework)
 
 > 状态：可用。97 项断言全部通过，零编译警告。
 
