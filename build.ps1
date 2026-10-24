@@ -46,6 +46,26 @@ $refs = @(
 )
 $common = @("/nologo", "/langversion:5", "/optimize+", "/warn:4")
 
+# ---------- 日志 ----------
+# 编译与测试的输出同时落盘，便于在无人值守环境（CI）里事后排查。
+$envLog   = Join-Path $buildDir "env.log"
+$buildLog = Join-Path $buildDir "build.log"
+$testLog  = Join-Path $buildDir "selftest.log"
+
+$envLines = @(
+    "=== VigilKit 构建环境 ==="
+    "时间                : $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss zzz')"
+    "PowerShell 版本     : $($PSVersionTable.PSVersion)"
+    "输出是否被重定向    : $([Console]::IsOutputRedirected)"
+    "执行策略            : $(Get-ExecutionPolicy)"
+    "当前目录            : $PWD"
+    "项目根目录          : $root"
+    "编译器              : $csc"
+    "编译器是否存在      : $(Test-Path $csc)"
+    "源文件数            : $((Get-ChildItem -Path (Join-Path $root 'src\VigilKit') -Recurse -Filter *.cs).Count)"
+)
+$envLines | Out-File -FilePath $envLog -Encoding UTF8
+
 if (-not $TestOnly) {
 
     Info "编译 VigilKit 库"
@@ -54,8 +74,8 @@ if (-not $TestOnly) {
     if ($libSources.Count -eq 0) { Die "src\VigilKit 下没有源文件" }
 
     $libArgs = @($common) + $refs + @("/target:library", "/out:$libraryDll") + $libSources
-    & $csc $libArgs
-    if ($LASTEXITCODE -ne 0) { Die "库编译失败" }
+    & $csc $libArgs 2>&1 | Tee-Object -FilePath $buildLog
+    if ($LASTEXITCODE -ne 0) { Die "库编译失败（详见 $buildLog）" }
     Ok ("VigilKit.dll 已生成: {0:N0} 字节" -f (Get-Item $libraryDll).Length)
 
     Info "编译测试程序"
@@ -65,8 +85,8 @@ if (-not $TestOnly) {
     $testArgs = @($common) + $refs + @(
         "/r:$libraryDll", "/target:exe", "/out:$testExe"
     ) + $testSources
-    & $csc $testArgs
-    if ($LASTEXITCODE -ne 0) { Die "测试程序编译失败" }
+    & $csc $testArgs 2>&1 | Tee-Object -FilePath $buildLog -Append
+    if ($LASTEXITCODE -ne 0) { Die "测试程序编译失败（详见 $buildLog）" }
     Ok ("VigilKit.Tests.exe 已生成: {0:N0} 字节" -f (Get-Item $testExe).Length)
 }
 
@@ -76,7 +96,7 @@ if (-not (Test-Path $testExe)) { Die "找不到测试程序，请先完整构建
 Write-Host ""
 Info "运行自测"
 Write-Host ""
-& $testExe
+& $testExe 2>&1 | Tee-Object -FilePath $testLog
 $exitCode = $LASTEXITCODE
 
 Write-Host ""

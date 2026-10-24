@@ -7,46 +7,59 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   test:
     name: 构建并运行自测
     runs-on: windows-latest
 
-    defaults:
-      run:
-        shell: pwsh
-
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
 
-      - name: 环境信息
-        run: |
-          "pwsh 版本            : $($PSVersionTable.PSVersion)"
-          "输出是否重定向       : $([Console]::IsOutputRedirected)"
-          "ErrorActionPreference: $ErrorActionPreference"
-
       - name: 构建并运行自测
+        shell: pwsh
         run: |
-          # 刻意不用 Stop 模式：编译器与测试都是原生命令，
-          # 让退出码由我们自己检查，避免环境差异导致误判失败。
           $ErrorActionPreference = 'Continue'
-
           ./build.ps1
           $code = $LASTEXITCODE
           ""
           "build.ps1 退出码: $code"
-
           if ($code -ne 0) { exit $code }
 
-      - name: 上传构建日志
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts
-          path: |
-            build/*.log
-            build/*.err
-            build/*.txt
-          if-no-files-found: ignore
-          retention-days: 7
+      # GitHub Actions 的运行日志需要登录才能查看。
+      # 为了让任何人都能自助排查失败原因，把日志推到 ci-logs 分支。
+      - name: 失败时把日志推到 ci-logs 分支
+        if: failure()
+        shell: pwsh
+        run: |
+          $body = "run  : $env:GITHUB_RUN_ID`n"
+          $body += "sha  : $env:GITHUB_SHA`n"
+          $body += "job  : $env:GITHUB_JOB`n`n"
+
+          $found = $false
+          foreach ($f in @("env.log", "build.log", "selftest.log")) {
+            $p = Join-Path "build" $f
+            if (Test-Path $p) {
+              $found = $true
+              $body += "========== $f ==========`n"
+              $body += (Get-Content $p -Raw)
+              $body += "`n`n"
+            }
+          }
+          if (-not $found) { $body += "(build 目录下没有任何日志文件，构建可能在更早阶段失败)" }
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git checkout --orphan ci-logs
+          git rm -r --cached . -q 2>$null
+          Get-ChildItem -Force | Where-Object { $_.Name -ne ".git" } |
+            Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+
+          Set-Content -Path "ci-log.txt" -Value $body -Encoding UTF8
+          git add -f ci-log.txt
+          git commit -m "CI 失败日志 run $env:GITHUB_RUN_ID"
+          git push -f origin ci-logs
